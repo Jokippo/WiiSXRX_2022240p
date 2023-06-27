@@ -23,9 +23,75 @@
 
 #define DEFAULT_FIFO_SIZE		(256 * 1024)
 
-
+GXRModeObj TVMODE_240p =
+{
+	VI_TVMODE_EURGB60_DS, 	// viDisplayMode
+	640, 					// fbWidth
+	240, 					// efbHeight
+	240, 					// xfbHeight
+	(VI_MAX_WIDTH_NTSC - 640)/2, 		// viXOrigin
+	(VI_MAX_HEIGHT_NTSC/2 - 480/2)/2, 	// viYOrigin
+	640, 					// viWidth
+	480, 					// viHeight
+	VI_XFBMODE_SF, 			// xFBmode
+	GX_FALSE, 				// field_rendering
+	GX_FALSE, 				// aa
+	// sample points arranged in increasing Y order
+	{
+		{6,6},{6,6},{6,6},  // pix 0, 3 sample points, 1/12 units, 4 bits each
+		{6,6},{6,6},{6,6},  // pix 1
+		{6,6},{6,6},{6,6},  // pix 2
+		{6,6},{6,6},{6,6}   // pix 3
+	},
+	// vertical filter[7], 1/64 units, 64=1.0
+	{
+		0, 		// line n-1
+		0, 		// line n-1
+		21, 	// line n
+		22, 	// line n
+		21, 	// line n+1
+		0, 		// line n+1
+		0 		// line n+2
+	}
+};
 extern "C" unsigned int usleep(unsigned int us);
 void video_mode_init(GXRModeObj *rmode, unsigned int *fb1, unsigned int *fb2);
+
+GXRModeObj gvmode;
+GXRModeObj gpvmode;
+extern "C" void switchToTVMode(unsigned int gpuStatReg){
+	GXRModeObj *rmode;
+	f32 yscale;
+	
+	if (gpuStatReg & 0x80000)
+	{
+		rmode = &gvmode;	
+		GX_SetCopyFilter(rmode->aa,rmode->sample_pattern,GX_TRUE,rmode->vfilter);
+	}
+	else
+	{
+		if ((CONF_GetEuRGB60() > 0) || (CONF_GetVideo() == CONF_VIDEO_NTSC))
+			rmode = &TVMODE_240p;
+		else
+		{
+			rmode = &TVMODE_240p;
+			rmode->viTVMode = VI_TVMODE_PAL_DS;
+			rmode->viXOrigin = (VI_MAX_WIDTH_PAL - 640)/2;
+			rmode->viYOrigin = (VI_MAX_HEIGHT_PAL/2 - 480/2)/2;	
+		}
+		
+		GX_SetCopyFilter(rmode->aa,rmode->sample_pattern,GX_FALSE,rmode->vfilter);
+	}
+		
+	VIDEO_Configure (rmode);
+	VIDEO_Flush();
+	VIDEO_WaitVSync();	
+	if(rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
+	GX_SetViewport(0.0F, 0.0F, rmode->fbWidth, rmode->efbHeight, 0.0F, 1.0F);	
+	yscale = GX_GetYScaleFactor(rmode->efbHeight,rmode->xfbHeight);
+	GX_SetDispCopyYScale(yscale);
+}
+
 
 namespace menu {
 
@@ -75,7 +141,7 @@ Graphics::Graphics(GXRModeObj *rmode)
 	}
 
 	//vmode->efbHeight = viewportHeight; // Note: all possible modes have efbHeight of 480
-
+	memcpy( &gvmode, vmode, sizeof(GXRModeObj));
 	VIDEO_Configure(vmode);
 
 	xfb[0] = MEM_K0_TO_K1(SYS_AllocateFramebuffer(vmode));

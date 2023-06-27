@@ -168,6 +168,7 @@ signed   long  *psxVsl;
 
 static long       lGPUdataRet;
 long              lGPUstatusRet;
+long              lGPUstatusRetOld;
 char              szDispBuf[64];
 char              szMenuBuf[36];
 char              szDebugText[512];
@@ -200,6 +201,8 @@ unsigned long     lGPUInfoVals[16];
 int               iFakePrimBusy=0;
 int               iRumbleVal=0;
 int               iRumbleTime=0;
+
+void switchToTVMode(unsigned int gpuStatReg);
 
 ////////////////////////////////////////////////////////////////////////
 // some misc external display funcs
@@ -798,6 +801,15 @@ void PEOPS_GPUupdateLace(void)
       updateDisplay();                                 // -> update display
     }
   }
+  // Check if TVMode needs to be changed (240 or 480 lines)
+	if (originalMode == ORIGINALMODE_ENABLE)
+	{
+		if((lGPUstatusRet & 0x80000) != (lGPUstatusRetOld & 0x80000))
+		{
+			switchToTVMode(lGPUstatusRet);
+			lGPUstatusRetOld = lGPUstatusRet;
+		}
+	}
 
  bDoVSyncUpdate=FALSE;                                 // vsync done
 }

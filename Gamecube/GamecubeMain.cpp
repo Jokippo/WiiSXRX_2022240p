@@ -133,6 +133,7 @@ char numMultitaps;
 char lang = 0;
 char oldLang = 0;
 char canChangeFont = 0;
+char originalMode = 0;
 
 #define CONFIG_STRING_TYPE 0
 #define CONFIG_STRING_SIZE 256
@@ -179,7 +180,8 @@ static struct {
   { "smbpassword", smbPassWord, CONFIG_STRING_TYPE, CONFIG_STRING_TYPE },
   { "smbsharename", smbShareName, CONFIG_STRING_TYPE, CONFIG_STRING_TYPE },
   { "smbipaddr", smbIpAddr, CONFIG_STRING_TYPE, CONFIG_STRING_TYPE },
-  { "lang", &lang, ENGLISH, ITALIAN }
+  { "lang", &lang, ENGLISH, ITALIAN },
+  { "TVMode", &originalMode, ORIGINALMODE_DISABLE, ORIGINALMODE_ENABLE }
 };
 void handleConfigPair(char* kv);
 void readConfig(FILE* f);
