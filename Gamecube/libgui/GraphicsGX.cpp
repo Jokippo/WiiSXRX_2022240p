@@ -77,10 +77,15 @@ extern "C" void switchToTVMode(unsigned int gpuStatReg){
 	}
 	else
 	{
-		if ((CONF_GetEuRGB60() > 0) || (CONF_GetVideo() == CONF_VIDEO_NTSC))
+		if (CONF_GetVideo() == CONF_VIDEO_NTSC)
 		{
 			rmode = &TVMODE_240p;
+			rmode->viTVMode = VI_TVMODE_NTSC_DS;
 			
+		}
+		else if (CONF_GetEuRGB60() > 0)
+		{
+			rmode = &TVMODE_240p;
 		}
 		else if (CONF_GetVideo() == CONF_VIDEO_MPAL)
 		{
