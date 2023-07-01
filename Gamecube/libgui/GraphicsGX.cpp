@@ -82,10 +82,10 @@ extern "C" void switchToTVMode(long gpuStatReg, short dWidth, short dHeight, boo
 			rmode->fbWidth = dWidth;
 			rmode->efbHeight = dHeight;
 			rmode->xfbHeight = dHeight;
-			rmode->viYOrigin = (VI_MAX_HEIGHT_NTSC/2 - dHeight/2)/2;
+			rmode->viYOrigin = (VI_MAX_HEIGHT_NTSC - dHeight)/2;
 			GX_SetCopyFilter(rmode->aa,rmode->sample_pattern,GX_FALSE,rmode->vfilter);
-			if ((CONF_GetEuRGB60() > 0) || (CONF_GetVideo() == CONF_VIDEO_PAL))
-				rmode->viYOrigin = (VI_MAX_HEIGHT_PAL/2 - dHeight/2)/2;
+			if ((CONF_GetEuRGB60() == 0) && (CONF_GetVideo() == CONF_VIDEO_PAL))
+				rmode->viYOrigin = (VI_MAX_HEIGHT_PAL - dHeight)/2;
 		}
 		xfbWidth = VIDEO_PadFramebufferWidth(rmode->fbWidth);  
 		width = xfbWidth;
