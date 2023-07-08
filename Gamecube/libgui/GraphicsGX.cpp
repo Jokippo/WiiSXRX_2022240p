@@ -212,7 +212,7 @@ Graphics::Graphics(GXRModeObj *rmode)
 	//vmode->efbHeight = viewportHeight; // Note: all possible modes have efbHeight of 480
 	memcpy( &gvmode, vmode, sizeof(GXRModeObj));
 	memcpy( &mgvmode, vmode, sizeof(GXRModeObj));
-	if (!VIDEO_HaveComponentCable())
+	if (trapFilter)
 		VIDEO_SetTrapFilter(1);
 		
 	VIDEO_Configure(vmode);
