@@ -26,6 +26,7 @@
 #include "cdrom.h"
 #include "gpu.h"
 #include "Gamecube/DEBUG.h"
+#include "Gamecube/wiiSXconfig.h"
 
 // add xjsxjs197 start
 u32 tmpVal;
@@ -763,10 +764,14 @@ void psxHwWrite32(u32 add, u32 value) {
 #endif
             // Fix the PAL game sound issue when NTSC Bios starts
             // setting display infos
-            if (Config.PsxType == PSX_TYPE_PAL && (value >> 24) == 0x08)
+			if (forceNTSC && (value >> 24) == 0x08 ){
+				value &= ~0x8;
+			}
+            else if (Config.PsxType == PSX_TYPE_PAL && (value >> 24) == 0x08)
             {
                 value |= 0x8;
             }
+
             GPU_writeStatus(value);
             gpuSyncPluginSR();
             return;

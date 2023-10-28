@@ -34,6 +34,8 @@
 #include "dfsound/externals.h"
 #include "database.h"
 
+#include "PeopsSoftGPU/externals.h"
+
 int Log = 0;
 
 char CdromId[10];
@@ -402,15 +404,21 @@ int CheckCdrom() {
 	if (CdromId[0] == '\0')
 		strcpy(CdromId, "SLUS99999");
 
-	if (Config.PsxAuto) { // autodetect system (pal or ntsc)
+	if (forceNTSC){
+		Config.PsxType = PSX_TYPE_NTSC;
+		PSXDisplay.PAL = 0;
+	}
+	else if (Config.PsxAuto) { // autodetect system (pal or ntsc)
 		if (
 			/* Make sure Wild Arms SCUS-94608 is not detected as a PAL game. */
 			((CdromId[0] == 's' || CdromId[0] == 'S') && (CdromId[2] == 'e' || CdromId[2] == 'E')) ||
 			!strncmp(CdromId, "DTLS3035", 8) ||
 			!strncmp(CdromId, "PBPX95001", 9) || // according to redump.org, these PAL
 			!strncmp(CdromId, "PBPX95007", 9) || // discs have a non-standard ID;
-			!strncmp(CdromId, "PBPX95008", 9))   // add more serials if they are discovered.
+			!strncmp(CdromId, "PBPX95008", 9)){   // add more serials if they are discovered.
 			Config.PsxType = PSX_TYPE_PAL; // pal
+			PSXDisplay.PAL = 1;
+			}
 		else Config.PsxType = PSX_TYPE_NTSC; // ntsc
 	}
 	//psxUpdateVSyncRate();
